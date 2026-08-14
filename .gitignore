@@ -10,3 +10,5 @@ dist/
 *.key
 service-account*.json
 .superpowers/
+
+.vercel
