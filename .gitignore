@@ -13,3 +13,4 @@ service-account*.json
 .superpowers/
 
 .vercel
+.env*
