@@ -21,3 +21,19 @@ Implemented the editorial visual system in `app/globals.css` without changing pa
 ## Concerns
 
 - Hero and mosaic photos depend on the existing remote Unsplash URLs at runtime.
+
+## Review Fix
+
+- Removed the conflicting inline `.hero` `background` shorthand from `app/page.tsx`; unrelated inline hero sizing, spacing, color, and typography rules remain unchanged.
+- `npm run build`
+- Output: Next.js production compilation, TypeScript checking, page-data collection, and static generation completed successfully with exit code 0.
+
+```text
+> ists-landing@0.1.0 build
+> next build
+
+Compiled successfully
+Finished TypeScript
+Generating static pages (4/4)
+Static route /
+```
