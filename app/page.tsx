@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type HistoryItem = { year: string; title: string; text: string };
 type Purpose = { number: string; title: string; text: string };
@@ -70,39 +70,63 @@ const fullSchedule = [
 
 const fieldMinistry = ["세네갈", "카메룬", "우즈벡", "태국 · 방콕", "태국 · 치앙라이", "태국 · 우본", "필리핀 · 앙겔레스", "필리핀 · 다바오", "독일 · 프랑크푸르트", "캐나다 · 밴쿠버"];
 const contributors = ["총무: 서관옥 선교사", "진행: 김인호 선교사 · 시몽 간사 · 박찬묵 간사", "사무: 허예지 간사", "재정: 최민철 선교사", "관리: 박지훈 간사", "찬양: 태국 간사들", "촬영 및 영상: 박찬묵 간사"];
+const budget = [
+  ["수입", "6,000,000원"],
+  ["지출", "6,000,000원"],
+  ["식비", "3,250,000원"],
+  ["장소", "1,000,000원"],
+  ["활동", "1,000,000원"],
+  ["사무", "100,000원"],
+  ["진행", "100,000원"],
+  ["관리", "100,000원"],
+  ["간식", "200,000원"],
+  ["예비비", "250,000원"],
+] as const;
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState("2026");
   const [selectedDay, setSelectedDay] = useState("mon");
   const [openProgram, setOpenProgram] = useState<number | null>(0);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const dayTabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const activeHistory = history.find((item) => item.year === selectedYear) ?? history[0];
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const handleMenuKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleMenuKeyDown);
+    return () => document.removeEventListener("keydown", handleMenuKeyDown);
+  }, [menuOpen]);
+
+  const handleDayKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    let nextIndex = index;
+    if (event.key === "ArrowRight") nextIndex = (index + 1) % days.length;
+    if (event.key === "ArrowLeft") nextIndex = (index - 1 + days.length) % days.length;
+    if (event.key === "Home") nextIndex = 0;
+    if (event.key === "End") nextIndex = days.length - 1;
+    if (nextIndex === index) return;
+
+    event.preventDefault();
+    setSelectedDay(days[nextIndex].id);
+    dayTabRefs.current[nextIndex]?.focus();
+  };
 
   return (
     <main className="editorial-shell">
-      <style jsx global>{`
-        :root { --navy: #162b3b; --blue: #2d5665; --gold: #c69a5a; --cream: #f3efe7; --paper: #fffdf8; --ink: #253038; --muted: #69777a; --line: #d9ded9; }
-        * { box-sizing: border-box; } html { scroll-behavior: smooth; } body { margin: 0; background: var(--cream); color: var(--ink); font-family: Arial, "Noto Sans KR", sans-serif; } button { font: inherit; }
-         .editorial-shell { background: var(--paper); } .editorial-content { overflow: hidden; } .site-header { position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; padding: 19px clamp(22px, 5vw, 74px); background: rgb(255 253 248 / 92%); border-bottom: 1px solid var(--line); backdrop-filter: blur(12px); } .brand { color: var(--navy); font-weight: 800; letter-spacing: .14em; } .brand small { display: block; margin-top: 3px; color: var(--gold); font-size: 9px; letter-spacing: .18em; } .site-nav { display: flex; gap: 26px; } .site-nav a { color: var(--muted); font-size: 12px; text-decoration: none; } .site-nav a:hover { color: var(--gold); } .menu-button { display: none; border: 0; background: none; color: var(--navy); font-size: 11px; letter-spacing: .1em; }
-         .hero { min-height: 720px; padding: 120px clamp(24px, 11vw, 170px) 82px; color: white; background: linear-gradient(90deg, rgb(22 43 59 / 88%), rgb(22 43 59 / 42%)), url("${photos[0].src}") center / cover; } .hero-kicker, .eyebrow, .micro { color: var(--gold); font-size: 11px; letter-spacing: .19em; } .hero h1 { max-width: 900px; margin: 35px 0 25px; font-size: clamp(48px, 8vw, 112px); line-height: 1.02; letter-spacing: -.09em; } .hero h1 span { color: var(--gold); } .hero-theme { color: rgb(255 255 255 / 75%); font-size: 18px; line-height: 1.8; } .hero-meta { display: flex; gap: 34px; margin-top: 70px; color: rgb(255 255 255 / 72%); font-size: 12px; } .hero-meta strong { display: block; margin-top: 7px; color: white; } .anchor-cta { display: inline-flex; margin-top: 38px; padding: 14px 20px; color: var(--navy); background: var(--gold); text-decoration: none; font-size: 12px; font-weight: 700; }
-        .section { max-width: 1240px; margin: auto; padding: 115px clamp(24px, 8vw, 110px); } .section-head { display: grid; grid-template-columns: 90px 1fr; gap: 20px; margin-bottom: 55px; } .section-no { color: var(--gold); font-size: 12px; letter-spacing: .14em; } h2 { max-width: 700px; margin: 9px 0 0; color: var(--navy); font-size: clamp(32px, 5vw, 65px); line-height: 1.08; letter-spacing: -.08em; } .intro-copy { max-width: 680px; margin: 0 0 0 110px; color: var(--muted); font-size: 16px; line-height: 2; }
-        .timeline { display: grid; grid-template-columns: 1.1fr 1fr; gap: 70px; align-items: end; } .year-list { display: flex; flex-wrap: wrap; gap: 9px; } .year-list button, .day-tabs button { border: 1px solid var(--line); color: var(--muted); background: transparent; cursor: pointer; } .year-list button { padding: 12px 16px; } .year-list button[aria-pressed="true"], .day-tabs button[aria-selected="true"] { color: white; background: var(--navy); border-color: var(--navy); } .timeline-story { padding: 32px; border-top: 2px solid var(--gold); background: var(--cream); } .timeline-story strong { display: block; color: var(--gold); font-size: 42px; } .timeline-story h3 { margin: 13px 0; color: var(--navy); font-size: 25px; letter-spacing: -.06em; } .timeline-story p { margin: 0; color: var(--muted); line-height: 1.8; }
-        .purpose-grid { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); } .purpose-card { min-height: 245px; padding: 25px 20px 20px 0; border-right: 1px solid var(--line); } .purpose-card + .purpose-card { padding-left: 20px; } .purpose-card:last-child { border-right: 0; } .purpose-card b { color: var(--gold); font-size: 12px; } .purpose-card h3 { margin: 55px 0 15px; color: var(--navy); font-size: 21px; } .purpose-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
-        .photo-mosaic { display: grid; grid-template-columns: 1.3fr 1fr 1fr; grid-template-rows: 210px 210px; gap: 10px; } .photo { position: relative; min-height: 190px; overflow: hidden; background: var(--navy); } .photo:first-child { grid-row: span 2; } .photo img { width: 100%; height: 100%; object-fit: cover; object-position: var(--position); transition: transform .5s; } .photo:hover img { transform: scale(1.04); } .photo figcaption { position: absolute; right: 15px; bottom: 14px; left: 15px; color: white; font-size: 12px; text-shadow: 0 1px 5px #000; }
-        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; margin-top: 50px; background: var(--line); } .stat { padding: 28px 22px; background: var(--cream); } .stat strong { display: block; color: var(--navy); font-size: 37px; letter-spacing: -.08em; } .stat span { display: block; margin: 10px 0 4px; color: var(--gold); font-size: 12px; } .stat small { color: var(--muted); }
-         .feature { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; } .feature-copy { padding: 48px; color: white; background: var(--navy); } .feature-copy h2 { color: white; } .feature-copy p { max-width: 450px; color: rgb(255 255 255 / 68%); line-height: 1.9; } .feature-mark { display: flex; align-items: center; justify-content: center; min-height: 360px; padding: 35px; color: var(--navy); background: var(--gold); text-align: center; } .infographic-card { border: 1px solid rgb(22 43 59 / 20%); } .infographic-card h2 { margin: 18px auto 0; color: var(--navy); font-size: clamp(27px, 4vw, 48px); } .infographic-card .flow { margin: 34px 0; font-size: clamp(20px, 3vw, 38px); letter-spacing: -.08em; } .infographic-card b { display: block; font-size: 23px; letter-spacing: -.07em; } .infographic-card small { display: block; margin-top: 13px; } .infographic-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 30px; text-align: left; background: rgb(22 43 59 / 18%); } .infographic-stats div { padding: 13px; background: rgb(255 253 248 / 35%); } .infographic-stats strong { display: block; font-size: 25px; } .infographic-stats small { margin-top: 5px; font-size: 10px; line-height: 1.5; }
-         .details-grid { display: grid; gap: 12px; } .details-grid details { border-top: 1px solid var(--line); background: var(--cream); } .details-grid summary { padding: 19px 20px; color: var(--navy); font-weight: 700; cursor: pointer; } .detail-table { overflow-x: auto; padding: 0 20px 20px; } .detail-table table { min-width: 780px; } .source-copy { padding: 0 20px 20px; color: var(--muted); font-size: 13px; line-height: 1.9; } .source-copy ul { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 25px; padding-left: 20px; }
-        .program { background: var(--cream); } .day-tabs { display: flex; gap: 8px; margin-bottom: 18px; } .day-tabs button { min-width: 86px; padding: 13px 10px; } .day-tabs strong, .day-tabs small { display: block; } .day-tabs small { margin-top: 5px; font-size: 10px; } .day-schedule { display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 56px; border-top: 2px solid var(--navy); } .day-schedule div { min-height: 110px; padding: 18px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--muted); font-size: 13px; line-height: 1.7; } .day-schedule span { display: block; margin-bottom: 16px; color: var(--gold); font-size: 10px; letter-spacing: .12em; } .program-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; } .program-card { padding: 27px; border: 1px solid var(--line); background: var(--paper); } .program-card h3 { min-height: 58px; margin: 35px 0 15px; color: var(--navy); font-size: 23px; letter-spacing: -.07em; } .program-card p { min-height: 78px; color: var(--muted); font-size: 13px; line-height: 1.8; } .program-card button { width: 100%; padding: 12px 0; border: 0; border-top: 1px solid var(--line); color: var(--navy); background: transparent; text-align: left; cursor: pointer; } .program-details { margin: 15px 0 0; padding-left: 18px; color: var(--muted); font-size: 12px; line-height: 2; }
-        .closing { color: white; background: var(--blue); text-align: center; } .closing h2 { margin-right: auto; margin-left: auto; color: white; } .closing p { max-width: 560px; margin: 22px auto; color: rgb(255 255 255 / 72%); line-height: 1.9; } .site-footer { display: flex; justify-content: space-between; padding: 25px clamp(24px, 8vw, 110px); color: rgb(255 255 255 / 64%); background: var(--navy); font-size: 11px; } .site-footer strong { color: var(--gold); }
-         @media (max-width: 760px) { .site-nav { display: none; position: absolute; top: 65px; right: 20px; left: 20px; padding: 18px; background: var(--paper); border: 1px solid var(--line); } .site-nav.open { display: grid; gap: 16px; } .menu-button { display: block; } .hero { min-height: 650px; padding-top: 80px; } .hero-meta { flex-wrap: wrap; margin-top: 45px; } .section { padding-top: 75px; padding-bottom: 75px; } .section-head, .intro-copy { margin-left: 0; } .section-head { grid-template-columns: 45px 1fr; } .purpose-grid, .stats, .feature, .program-grid { grid-template-columns: 1fr; } .purpose-card, .purpose-card + .purpose-card { min-height: auto; padding: 22px 0; border-right: 0; border-bottom: 1px solid var(--line); } .purpose-card h3 { margin-top: 22px; } .timeline { grid-template-columns: 1fr; gap: 30px; } .photo-mosaic { grid-template-columns: 1fr 1fr; grid-template-rows: 190px 190px 190px; } .photo:first-child { grid-row: span 2; } .photo:last-child { grid-column: span 2; } .day-tabs { overflow-x: auto; } .day-schedule { grid-template-columns: 1fr 1fr; } .day-schedule div { min-height: 100px; } .feature-copy { padding: 32px 24px; } .infographic-stats { grid-template-columns: 1fr; } .source-copy ul { grid-template-columns: 1fr; } .site-footer { flex-wrap: wrap; gap: 10px; } }
-      `}</style>
-
       <header className="site-header">
         <a className="brand" href="#top">ISTS<small>INTERNATIONAL STAFF TRAINING & SHARING</small></a>
         <nav id="mobile-navigation" className={`site-nav ${menuOpen ? "open" : ""}`} aria-label="주요 메뉴">
           <a href="#story" onClick={() => setMenuOpen(false)}>OUR STORY</a><a href="#purpose" onClick={() => setMenuOpen(false)}>PURPOSE</a><a href="#program" onClick={() => setMenuOpen(false)}>PROGRAM</a><a href="#support" onClick={() => setMenuOpen(false)}>SUPPORT</a>
         </nav>
-        <button className="menu-button" type="button" aria-expanded={menuOpen} aria-controls="mobile-navigation" onClick={() => setMenuOpen((open) => !open)}>MENU</button>
+        <button ref={menuButtonRef} className="menu-button" type="button" aria-expanded={menuOpen} aria-controls="mobile-navigation" onClick={() => setMenuOpen((open) => !open)}>MENU</button>
       </header>
       <div className="editorial-content">
       <section className="hero" id="top">
@@ -123,13 +147,14 @@ export default function Home() {
 
        <section className="section source-details"><div className="section-head"><span className="section-no">03 / SOURCE</span><div><p className="eyebrow">THE MANUSCRIPT</p><h2>한 주의 사람과<br />현장을 더 자세히.</h2></div></div><div className="details-grid">
          <details><summary>참가자 20명 상세 보기</summary><div className="detail-table"><table><thead><tr><th>나라</th><th>이름</th><th>English name</th><th>성별</th><th>생년월일</th><th>나이</th><th>직분</th></tr></thead><tbody>{participants.map((person) => <tr key={person.english}><td>{person.country}</td><td>{person.name}</td><td>{person.english}</td><td>{person.gender}</td><td>{person.birth}</td><td>{person.age}</td><td>{person.role}</td></tr>)}</tbody></table></div></details>
-         <details><summary>전체 일일 일정 보기</summary><div className="detail-table"><table><thead><tr><th>시간</th><th>13일 · 월</th><th>14일 · 화</th><th>15일 · 수</th><th>16일 · 목</th><th>17일 · 금</th></tr></thead><tbody>{fullSchedule.map((row) => <tr key={row[0]}>{row.map((item, index) => index === 0 ? <th key={item}>{item}</th> : <td key={`${row[0]}-${index}`}>{item || "-"}</td>)}</tr>)}</tbody></table></div></details>
-         <details><summary>프로그램 기여자와 현지 사역 보기</summary><div className="source-copy"><ul>{contributors.map((person) => <li key={person}>{person}</li>)}</ul><p><strong>현지사역 소개 10개:</strong> {fieldMinistry.join(" · ")}</p><p>모임 선교 사역이 없는 5개국의 해외 선교사들이 특강 시간에 사역과 협력 요청사항을 나눕니다.</p><p><strong>예배:</strong> 시작 예배 서관옥 선교사 · 마침 예배 최민철 선교사</p><p><strong>교제:</strong> 목요채플 장제니스 간사 · Outing 춘천지구 · 서울(양화진)</p></div></details>
-       </div></section>
+          <details><summary>전체 일일 일정 보기</summary><div className="detail-table"><table><thead><tr><th>시간</th><th>13일 · 월</th><th>14일 · 화</th><th>15일 · 수</th><th>16일 · 목</th><th>17일 · 금</th></tr></thead><tbody>{fullSchedule.map((row) => <tr key={row[0]}>{row.map((item, index) => index === 0 ? <th key={item}>{item}</th> : <td key={`${row[0]}-${index}`}>{item || "-"}</td>)}</tr>)}</tbody></table></div></details>
+          <details><summary>프로그램 기여자와 현지 사역 보기</summary><div className="source-copy"><ul>{contributors.map((person) => <li key={person}>{person}</li>)}</ul><p><strong>현지사역 소개 10개:</strong> {fieldMinistry.join(" · ")}</p><p>모임 선교 사역이 없는 5개국의 해외 선교사들이 특강 시간에 사역과 협력 요청사항을 나눕니다.</p><p><strong>예배:</strong> 시작 예배 서관옥 선교사 · 마침 예배 최민철 선교사</p><p><strong>교제:</strong> 목요채플 장제니스 간사 · Outing 춘천지구 · 서울(양화진)</p></div></details>
+          <details><summary>원고 예산 상세 보기</summary><div className="detail-table"><table><thead><tr><th>항목</th><th>금액</th></tr></thead><tbody>{budget.map(([label, amount]) => <tr key={label}><th>{label}</th><td>{amount}</td></tr>)}</tbody></table><p className="source-copy">식비 산출 근거: 10,000원 × 13끼 × 25명</p></div></details>
+        </div></section>
 
-       <section className="section program" id="program"><div className="section-head"><span className="section-no">04 / PROGRAM</span><div><p className="eyebrow">A WEEK TO REMEMBER</p><h2>배움과 나눔이<br />일상이 되는 5일.</h2></div></div><div className="day-tabs" role="tablist" aria-label="일정 선택">{days.map((day) => <button id={`tab-${day.id}`} key={day.id} type="button" role="tab" aria-selected={selectedDay === day.id} aria-controls={`panel-${day.id}`} onClick={() => setSelectedDay(day.id)}><strong>{day.label}</strong><small>{day.date}</small></button>)}</div>{days.map((day) => <div id={`panel-${day.id}`} key={day.id} className="day-schedule" role="tabpanel" aria-labelledby={`tab-${day.id}`} aria-live="polite" hidden={selectedDay !== day.id}>{day.items.map((item, index) => <div key={`${day.id}-${item}`}><span>0{index + 1} / {day.date}</span>{item}</div>)}</div>)}<div className="program-grid">{programs.map((program, index) => { const isOpen = openProgram === index; return <article className="program-card" key={program.tag}><p className="micro">{program.tag}</p><h3>{program.title}</h3><p>{program.text}</p><button type="button" aria-expanded={isOpen} onClick={() => setOpenProgram(isOpen ? null : index)}>{isOpen ? "내용 접기 ↑" : "자세히 보기 ↓"}</button>{isOpen && <ul className="program-details">{program.details.map((detail) => <li key={detail}>{detail}</li>)}</ul>}</article>; })}</div></section>
+       <section className="section program" id="program"><div className="section-head"><span className="section-no">04 / PROGRAM</span><div><p className="eyebrow">A WEEK TO REMEMBER</p><h2>배움과 나눔이<br />일상이 되는 5일.</h2></div></div><div className="day-tabs" role="tablist" aria-label="일정 선택">{days.map((day, index) => <button ref={(element) => { dayTabRefs.current[index] = element; }} id={`tab-${day.id}`} key={day.id} type="button" role="tab" tabIndex={selectedDay === day.id ? 0 : -1} aria-selected={selectedDay === day.id} aria-controls={`panel-${day.id}`} onClick={() => setSelectedDay(day.id)} onKeyDown={(event) => handleDayKeyDown(event, index)}><strong>{day.label}</strong><small>{day.date}</small></button>)}</div>{days.map((day) => <div id={`panel-${day.id}`} key={day.id} className="day-schedule" role="tabpanel" aria-labelledby={`tab-${day.id}`} aria-live="polite" hidden={selectedDay !== day.id}>{day.items.map((item, index) => <div key={`${day.id}-${item}`}><span>0{index + 1} / {day.date}</span>{item}</div>)}</div>)}<div className="program-grid">{programs.map((program, index) => { const isOpen = openProgram === index; return <article className="program-card" key={program.tag}><p className="micro">{program.tag}</p><h3>{program.title}</h3><p>{program.text}</p><button type="button" aria-expanded={isOpen} onClick={() => setOpenProgram(isOpen ? null : index)}>{isOpen ? "내용 접기 ↑" : "자세히 보기 ↓"}</button>{isOpen && <ul className="program-details">{program.details.map((detail) => <li key={detail}>{detail}</li>)}</ul>}</article>; })}</div></section>
 
-      <section className="section closing" id="support"><p className="eyebrow">SEND THEM WELL</p><h2>함께 기도하고,<br />함께 보내주세요.</h2><p>한 사람의 배움이 한 나라의 변화가 됩니다. 2026년 7월, 세계의 현지 간사들이 다시 일어설 수 있도록 기도와 후원으로 함께해 주세요.</p><a className="anchor-cta" href="#top">ISTS를 위해 함께하기 ↗</a></section>
+       <section className="section closing" id="support"><p className="eyebrow">SEND THEM WELL</p><h2>함께 기도하고,<br />함께 보내주세요.</h2><p>한 사람의 배움이 한 나라의 변화가 됩니다. 2026년 7월, 세계의 현지 간사들이 다시 일어설 수 있도록 기도와 후원으로 함께해 주세요.</p><a className="anchor-cta" href="#program">프로그램 자세히 보기</a></section>
        <footer className="site-footer"><strong>ISTS · 2026</strong><span>AI시대, 흔들리지 않는 비전 · 재생산 사역</span><span>JDM</span></footer>
       </div>
     </main>
