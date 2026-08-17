@@ -71,3 +71,33 @@ Process exited with code 0
 
 - The repository has no automated test script; verification for this fix is the requested production build.
 - Photo fallbacks still use remote Unsplash URLs and require network access at runtime.
+
+## Accessibility Fix Report
+
+### Fix
+
+- Rendered a matching `tabpanel` for every day at all times and use the native `hidden` state for inactive panels.
+- Preserved the active-day state, `aria-selected`, `aria-controls`, `aria-labelledby`, and `role="tablist"` / `role="tab"` / `role="tabpanel"` structure.
+
+### Build Verification
+
+Command:
+
+```text
+npm run build
+```
+
+Output:
+
+```text
+Next.js 16.3.1 (Turbopack)
+Compiled successfully
+TypeScript finished successfully
+Generated static pages successfully (4/4)
+Route / is static and prerendered
+Process exited with code 0
+```
+
+### Concerns
+
+- The repository has no automated test script; verification for this fix is the requested production build.
