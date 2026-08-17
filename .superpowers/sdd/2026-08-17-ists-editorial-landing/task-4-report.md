@@ -259,3 +259,50 @@ Route (app)
 ```
 
 Additional source checks confirmed no `style jsx` remains in `app/page.tsx`, and the required CTA, budget, Escape, arrow-navigation, and roving-tabIndex markers are present. Browser automation remains unavailable in this environment, so live viewport and keyboard interaction testing was not performed.
+
+## Remaining Stylesheet Regression Fix
+
+Date: 2026-08-17
+
+Restored the missing `.source-copy` and `.source-copy ul` rules in `app/globals.css`. Contributor/details copy now uses muted 13px typography with 1.9 line-height and 20px horizontal/20px bottom spacing. Contributor lists use a two-column grid with a 25px column gap on desktop and switch to one column at the existing 760px mobile breakpoint. No inline styles were added.
+
+### Verification
+
+Commands:
+
+```text
+npm run build
+```
+
+Build result: PASS, exit code 0.
+
+```text
+> ists-landing@0.1.0 build
+> next build
+
+▲ Next.js 16.3.1 (Turbopack)
+✓ Running next.config.mjs took 89ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.7s
+  Running TypeScript ...
+  Finished TypeScript in 5.1s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/4) ...
+  Generating static pages using 3 workers (1/4)
+  Generating static pages using 3 workers (2/4)
+  Generating static pages using 3 workers (3/4)
+✓ Generating static pages using 3 workers (4/4) in 901ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+└ ƒ /api/validate-gemini
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+```
+
+Source inspection found all three expected `.source-copy` selectors in `app/globals.css`; `git diff --check` passed.

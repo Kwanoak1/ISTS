@@ -126,6 +126,8 @@ h2 { max-width: 700px; margin: 9px 0 0; color: var(--navy); font: 800 clamp(32px
 .details-grid summary { min-height: 56px; padding: 19px 20px; color: var(--navy); font-weight: 700; cursor: pointer; overflow-wrap: anywhere; }
 .detail-table { padding: 0 20px 20px; overflow-x: auto; }
 .detail-table table { width: 100%; min-width: 780px; border-collapse: collapse; }
+.source-copy { padding: 0 20px 20px; color: var(--muted); font-size: 13px; line-height: 1.9; }
+.source-copy ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 25px; padding-left: 20px; }
 th, td { padding: 12px; border-bottom: 1px solid var(--line); text-align: left; font-size: 12px; vertical-align: middle; overflow-wrap: anywhere; }
 th { color: var(--navy); font-weight: 700; }
 thead th { color: white; background: var(--navy); white-space: nowrap; }
@@ -172,6 +174,7 @@ thead th { color: white; background: var(--navy); white-space: nowrap; }
   .day-schedule div { min-height: 100px; padding: 14px; }
   .feature-copy { padding: 32px 24px; }
   .infographic-stats { grid-template-columns: 1fr; }
+  .source-copy ul { grid-template-columns: 1fr; }
   .site-footer { flex-wrap: wrap; gap: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
