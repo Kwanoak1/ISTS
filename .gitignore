@@ -11,6 +11,7 @@ dist/
 *.key
 service-account*.json
 .superpowers/
+.worktrees/
 
 .vercel
 .env*
